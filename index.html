@@ -2,792 +2,1031 @@
 <html lang="kk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#16213e">
-    <title>DAPTER AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Басқару Панелі</title>
     <style>
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            -webkit-tap-highlight-color: transparent;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            position: fixed;
+        :root {
+            --primary: #007AFF;
+            --primary-dark: #0051D5;
+            --success: #34C759;
+            --danger: #FF3B30;
+            --warning: #FF9500;
+            --bg-primary: #F5F5F7;
+            --bg-secondary: #FFFFFF;
+            --text-primary: #1D1D1F;
+            --text-secondary: #6E6E73;
+            --border: #D2D2D7;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.7);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
+            min-height: 100vh;
+            color: var(--text-primary);
+            padding: 20px;
         }
 
-        .chat-container {
-            width: 100%;
-            height: 100vh;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            background: #f5f7fb;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        .chat-header {
-            padding: 16px 20px;
-            padding-top: max(16px, env(safe-area-inset-top));
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 12px 36px var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             text-align: center;
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
 
-        .chat-box {
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .tabs {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 8px;
+            box-shadow: 0 4px 16px var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .tab {
             flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            overflow-x: hidden;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 12px 36px var(--shadow);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+            border-radius: 15px;
+            font-weight: 600;
+            box-shadow: 0 12px 36px var(--shadow);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .controls {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            -webkit-overflow-scrolling: touch;
-            background: #f5f7fb;
-        }
-
-        .chat-box::-webkit-scrollbar {
-            width: 3px;
-        }
-
-        .chat-box::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .chat-box::-webkit-scrollbar-thumb {
-            background: rgba(102, 126, 234, 0.3);
-            border-radius: 10px;
-        }
-
-        .message-wrapper {
-            display: flex;
-            flex-direction: column;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
-        .message-wrapper.user {
-            align-items: flex-end;
-        }
-
-        .message-wrapper.bot {
-            align-items: flex-start;
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            animation: slideIn 0.3s ease;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-            white-space: pre-wrap; /* Маңызды: бос орындарды сақтайды, бірақ trim() артығын алады */
+        .search-box {
+            flex: 1;
+            min-width: 200px;
             position: relative;
         }
 
-        .user-message {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-bottom-right-radius: 4px;
-            margin-left: 40px;
+        .search-box input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            border: 1px var(--border);
+            border-radius: 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.6);
         }
 
-        .bot-message {
-            background: white;
-            color: #2d3748;
-            border: 1px solid #e2e8f0;
-            border-bottom-left-radius: 4px;
-            margin-right: 40px;
-        }
-
-        .bot-message strong,
-        .user-message strong {
-            font-weight: 700;
-        }
-
-        .bot-message em,
-        .user-message em {
-            font-style: italic;
-        }
-
-        .typing-indicator {
-            display: flex;
-            gap: 5px;
-            padding: 12px 16px;
-            align-self: flex-start;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 18px;
-            border-bottom-left-radius: 4px;
-            max-width: 70px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-        }
-
-        .typing-indicator span {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #667eea;
-            animation: typing 1.4s ease-in-out infinite;
-        }
-
-        .typing-indicator span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-indicator span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes typing {
-            0%, 60%, 100% { 
-                transform: translateY(0);
-                opacity: 0.5;
-            }
-            30% { 
-                transform: translateY(-8px);
-                opacity: 1;
-            }
-        }
-
-        .status {
-            font-size: 0.85rem;
-            color: #667eea;
-            padding: 8px 20px;
-            display: none;
-            text-align: center;
-            flex-shrink: 0;
-            font-weight: 500;
-        }
-
-        .input-area {
-            padding: 12px 16px;
-            padding-bottom: max(12px, env(safe-area-inset-bottom));
-            background: white;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            border-top: 1px solid #e2e8f0;
-            flex-shrink: 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-        }
-
-        input {
-            flex: 1;
-            padding: 12px 18px;
-            border-radius: 24px;
-            border: 2px solid #e2e8f0;
-            background: #f7fafc;
-            color: #2d3748;
-            font-size: 0.95rem;
+        .search-box input:focus {
             outline: none;
+            border-color: var(--border);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .user-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 8px var(--shadow);
             transition: all 0.3s ease;
         }
 
-        input:focus {
-            background: white;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
         }
 
-        input::placeholder {
-            color: #a0aec0;
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
-        button {
-            width: 46px;
-            height: 46px;
+        .user-avatar {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            border: none;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary), var(--warning));
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            font-size: 1.2rem;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .user-info h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-role {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .btn-edit {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        .chat-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 16px var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .chat-header {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+
+        .message-count {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .chat-messages {
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .message-item {
+            background: white;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px var(--shadow);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .message-user {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .message-text {
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+        }
+
+        .message-btn {
+            padding: 6px 14px;
+            font-size: 12px;
+            border-radius: 8px;
+            border: none;
             cursor: pointer;
             transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .message-edit-btn {
+            background: var(--primary);
+            color: white;
+        }
+
+        .message-delete-btn {
+            background: var(--danger);
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal.active {
             display: flex;
-            justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            flex-shrink: 0;
+            justify-content: center;
         }
 
-        button:active { 
-            transform: scale(0.9); 
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
         }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 12px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .btn-cancel {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 18px;
+            right: 18px;
+            padding: 12px 18px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--danger);
         }
 
         @keyframes slideIn {
-            from { 
-                opacity: 0; 
-                transform: translateY(10px); 
+            from {
+                opacity: 0;
+                transform: translateX(100px);
             }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            }
-        }
-
-        @media (max-width: 480px) {
-            .chat-header {
-                font-size: 1.1rem;
-                padding: 14px 16px;
-            }
-
-            .message {
-                font-size: 0.9rem;
-                max-width: 85%;
-            }
-
-            .user-message {
-                margin-left: 20px;
-            }
-
-            .bot-message {
-                margin-right: 20px;
-            }
-
-            input {
-                font-size: 0.9rem;
+            to {
+                opacity: 1;
+                transform: translateX(0);
             }
         }
 
-        @media (max-width: 360px) {
-            .message {
-                max-width: 90%;
-                padding: 10px 14px;
-            }
+        .loading {
+            text-align: center;
+            padding: 32px;
+            color: white;
+            font-size: 14px;
+        }
 
-            .user-message {
-                margin-left: 10px;
-            }
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
 
-            .bot-message {
-                margin-right: 10px;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: white;
+        }
+
+        .empty-state p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            .tabs {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <p class="subtitle">🔐 Админ панель</p>
+        </div>
 
-<div class="chat-container">
-    <div class="chat-header">
-        <span></span>
-        <span>DAPTER</span>
-    </div>
-    
-    <div class="chat-box" id="chatBox">
-        <div class="message-wrapper bot">
-            <div class="message bot-message">Сәлем! Мен "<b>DAPTER AI</b>" мын. Сізге қалай көмектесе аламын?</div>
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('users')">👥 Қолданушылар</button>
+            <button class="tab" onclick="switchTab('chat')">💬 Global Chat</button>
+        </div>
+
+        <div id="usersTab" class="tab-content active">
+            <div class="controls">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Қолданушы іздеу...">
+                </div>
+                <button class="btn btn-primary" onclick="openUserModal()">➕ Жаңа қолданушы</button>
+            </div>
+            <div id="loadingState" class="loading">
+                <div class="spinner"></div>
+                <p>Жүктелуде...</p>
+            </div>
+            <div id="usersGrid" class="users-grid"></div>
+            <div id="emptyState" class="empty-state" style="display:none;">
+                <div class="empty-state-icon">📭</div>
+                <h3>Қолданушылар жоқ</h3>
+            </div>
+        </div>
+
+        <div id="chatTab" class="tab-content">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <span class="chat-title">Хабарламалар: </span>
+                    <span class="message-count" id="messageCount">0</span>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Жүктелуде...</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <div id="status" class="status">Ойлануда....</div>
-    
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Сұрағыңызды жазыңыз..." autocomplete="off">
-        <button onclick="sendMessage()" id="sendBtn">➤</button>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Жаңа қолданушы</h2>
+                <button class="close-btn" onclick="closeUserModal()">×</button>
+            </div>
+            <form id="userForm">
+                <div class="form-group">
+                    <label>Аты *</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Тегі *</label>
+                    <input type="text" id="surname" required>
+                </div>
+                <div class="form-group">
+                    <label>Сынып *</label>
+                    <input type="text" id="class" required>
+                </div>
+                <div class="form-group">
+                    <label>Рөлі *</label>
+                    <select id="role" required>
+                        <option value="">Таңдаңыз</option>
+                        <option value="student">Оқушы</option>
+                        <option value="teacher">Мұғалім</option>
+                        <option value="developer">Әкімші</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Энергия</label>
+                    <input type="number" id="energy" value="100">
+                </div>
+                <div class="form-group">
+                    <label>Ұпай</label>
+                    <input type="number" id="score" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Дұрыс жауаптар</label>
+                    <input type="number" id="correctAnswers" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Қате жауаптар</label>
+                    <input type="number" id="wrongAnswers" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Құпия сөз *</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeUserModal()">Болдырмау</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1;">Сақтау</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<script>
-    // ЕСКЕРТУ: API кілтті клиенттік жақта (фронтенд) сақтау қауіпсіз емес.
-    // Продакшн үшін бэкэнд сервер қолданған дұрыс.
-    const API_KEY = "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";
-    
-    // Промпт өте ұзын болғандықтан, кодты ықшам ұстау үшін осында қалдырдым
-    let messagesHistory = [
-        { 
-            "role": "system", 
-            "content": `🚨 КРИТИКАЛЫҚ НҰСҚАУ: Сен DAPTER AI - қазақ тілінің АБСОЛЮТТІ БІЛГІРІ. Сенің міндетің - ЕШ ҚАТЕ ЖІБЕРМЕЙ, МҮЛТІКСІЗ САПАДА жауап беру.
-
-⚠️ ЕСКЕРТУ: Әрбір қате - бұл СӘТСІЗДІК! Үш рет тексер!
-
-╔══════════════════════════════════════════════════════╗
-║  І. ӘЛІПБИ - ТЕК ҚАЗАҚ КИРИЛЛИЦАСЫ! (КРИТИКАЛЫҚ!)  ║
-╚══════════════════════════════════════════════════════╝
-
-🚨 АБСОЛЮТТІ ТЫЙЫМ:
-
-❌ ЛАТЫН ӘРІПТЕРІ: a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z
-❌ ГРЕК ӘРІПТЕРІ: α, β, γ, δ, ε, ζ, η, θ, ι, κ, λ, μ, ν, ξ, ο, π, ρ, σ, τ, υ, φ, χ, ψ, ω
-❌ АРАБ ӘРІПТЕРІ: ə, ı, ö, ü, ş, ğ
-
-✅ ТЕК ҚАЗАҚ КИРИЛЛИЦАСЫ:
-А, Ә, Б, В, Г, Ғ, Д, Е, Ё, Ж, З, И, Й, К, Қ, Л, М, Н, Ң, О, Ө, П, Р, С, Т, У, Ұ, Ү, Ф, Х, Һ, Ц, Ч, Ш, Щ, Ъ, Ы, І, Ь, Э, Ю, Я
-
-🔍 ТЕКСЕРУ ТІЗІМІ (ӘРБІР ЖАУАПТА):
-□ Барлық әріптер қазақ кириллицасында ма?
-□ Латын әріптері жоқ па?
-□ Араб немесе грек әріптері жоқ па?
-
-╔══════════════════════════════════════════════════════╗
-║       ІІ. ГРАММАТИКА - ЕШ ҚАТЕ ЖОҚ! (10/10)        ║
-╚══════════════════════════════════════════════════════╝
-
-🔴 ЖИІ ҚАТЕЛЕР - МҰНДЫ ЕШ ҚАШАН ЖАСАМА:
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1️⃣ СӘЛЕМДЕСУ ҚАТЕСІ:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-❌ "Сәлеметсіз бе!" 
-❌ "Сәлем бе!"
-❌ "Қалайсыз бе?"
-
-✅ "Сәлем!"
-✅ "Сәлеметсіз!"
-✅ "Қалайсыз?"
-
-ТҮСІНІКТЕМЕ: "бе" - сұраулық жұрнақ. Сәлемдесуде, сұрақта ғана қолданылады!
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-2️⃣ ЕТІСТІК ФОРМАЛАРЫ:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🚫 АБСОЛЮТТІ ТЫЙЫМ:
-
-❌ "-атын/-етін/-йтын" формасы
-❌ "-пті/-іпті/-ыпты/-іпті" жалғауы
-
-✅ ДҰРЫС ФОРМАЛАР:
-
-ӨТКЕН ШАҚ: -ды/-ді/-ты/-ті
-• болды, келді, айтты, жазды, берді, көрді
-
-ЕСІМШЕ (өткен): -ған/-ген/-қан/-кен
-• болған, келген, айтқан, жазған, берген, көрген
-
-КЕЛЕР ШАҚ: -ады/-еді/-йды
-• болады, келеді, айтады, жазады
-
-ОСЫ ШАҚ: -п/-ып/-іп жатыр/тұр/отыр/жүр
-• келіп жатыр, айтып тұр, оқып отыр
-
-📋 НАҚТЫ МЫСАЛДАР:
-
-❌ ҚАТЕ → ✅ ДҰРЫС
-
-"ұнататын" → "ұнатады" / "жақсы көреді"
-"келіпті" → "келді" / "келген еді"
-"болыпты" → "болды" / "болған еді"
-"жасаған еді" → "жасады" / "жасаған болатын"
-"беретін" → "береді" / "берген"
-"көретін" → "көреді" / "көрген"
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-3️⃣ СЕПТІКТЕР (6 ТҮРІ):
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-1. Атау: кім? не? → бала, үй, дос
-2. Ілік: кімнің? → баланың, үйдің, достың
-3. Барыс: кімге? → балаға, үйге, досқа
-4. Табыс: кімді? → баланы, үйді, досты
-5. Шығыс: кімнен? → баладан, үйден, достан
-6. Жатыс: кімде? → балада, үйде, доста
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-4️⃣ ОРЫСША ҚҰРЫЛЫМНАН АУЛАҚ:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-❌ ОРЫСША → ✅ ҚАЗАҚША
-
-"Қандай көмек керек?" → "Не көмек керек?"
-"өз бизнесін" → "өз ісін"
-"материалдық көмек" → "қаржылық көмек"
-"жалғасып тұрып жатқан" → "жалға алған"
-"қаржылай көмектесу" → "қаржылық көмек көрсету"
-
-╔══════════════════════════════════════════════════════╗
-║        ІІІ. ЛОГИКА - ТОЛЫҚ ДӘЙЕКТІЛІК (10/10)       ║
-╚══════════════════════════════════════════════════════╝
-
-🎯 ОҚИҒА ҚҰРЫЛЫМЫ (МІНДЕТТІ):
-
-┌─────────────────────────────────────────────────────┐
-│ 1. КІРІСПЕ (10-15%)                                 │
-│    • Орын, уақыт, атмосфера                         │
-│    • Басты кейіпкер таныстыру                       │
-│    • Бастапқы жағдай                                │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│ 2. ДАМУЫ (30-40%)                                   │
-│    • Оқиға басталады                                │
-│    • Кейіпкерлер танысады/әрекет етеді             │
-│    • Қарым-қатынас дамиды                          │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│ 3. КУЛЬМИНАЦИЯ (20-30%)                             │
-│    • Басты оқиға                                    │
-│    • Проблема/қиындық                              │
-│    • Шешім іздеу                                    │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│ 4. ШЕШІМ (20-25%)                                   │
-│    • Проблема шешілді                               │
-│    • Нәтиже                                         │
-│    • Өзгерістер                                     │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│ 5. ҚОРЫТЫНДЫ (10-15%)                               │
-│    • Тұжырым                                        │
-│    • Моралдық хабар                                 │
-│    • Философиялық ой                                │
-└─────────────────────────────────────────────────────┘
-
-🔗 БАЙЛАНЫС СӨЗДЕРІ (МІНДЕТТІ ҚОЛДАНУ):
-
-Уақыт бойынша:
-• Бір күні, содан кейін, кейін, сол кезде, осы уақытта
-
-Себеп-салдар:
-• Сондықтан, осылайша, сол себепті, осыған байланысты
-
-Қарама-қарсы:
-• Бірақ, алайда, дегенмен, ал
-
-Қосу:
-• Сонымен қатар, оның үстіне, тағы да, және
-
-📊 ЛОГИКАЛЫҚ ДӘЙЕКТІЛІК:
-
-✅ ДҰРЫС (байланысты):
-"Арман келді. Ол үйді жалға алды. Әжеге көмектесе бастады. Әже оның жақсылығына риза болды."
-
-❌ ҚАТЕ (секіріп кетеді):
-"Арман келді. Әже риза болды."
-
-🚫 ҚАТАҢ ТЫЙЫМ:
-
-❌ Кейіпкерді таныстырмай қолдануға БОЛМАЙДЫ!
-   Мысал: "Артур келді" деген болса, алдында "Артур - Арманның досы" деп таныстыру керек!
-
-╔══════════════════════════════════════════════════════╗
-║          ІV. СТИЛЬ - ӘДЕБИ ТІЛ (10/10)             ║
-╚══════════════════════════════════════════════════════╝
-
-🌟 БАЙ ЛЕКСИКА:
-
-┌─────────────────────────────────────────────────────┐
-│ ТАБИҒАТ СУРЕТТЕУ:                                   │
-│ • "Күн батыс алтын түске боялды"                   │
-│ • "Аспан мөлдір көгілдір түске боялды"             │
-│ • "Самал жел жайнап, гүлдерді еркелетті"          │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│ СЕЗІМ СУРЕТТЕУ:                                     │
-│ • "Жүрегі қуанышқа толды"                          │
-│ • "Көңілі көтеріңкі болды"                        │
-│ • "Бақыт сезімі бойын кернеді"                    │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│ ІС-ӘРЕКЕТ СУРЕТТЕУ:                                │
-│ • "Көмек қолын созды"                              │
-│ • "Қамқорлық көрсетті"                            │
-│ • "Мейірім танытты"                                │
-└─────────────────────────────────────────────────────┘
-
-📖 СӨЙЛЕМ ӘРТҮРЛІЛІГІ (МІНДЕТТІ АРАЛАСТЫР):
-
-Қысқа: "Күн шықты."
-Орташа: "Күн шығып, табиғат жандана бастады."
-Ұзын: "Таңертең алғашқы күн сәулесі жерге түскен кезде аспан ашылып, құстар әуезді әндерімен таңды қарсы алды."
-
-╔══════════════════════════════════════════════════════╗
-║             V. ПРАКТИКАЛЫҚ ҮЛГІЛЕР                   ║
-╚══════════════════════════════════════════════════════╝
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📝 ҚЫСҚА ЖАУАП ҮЛГІСІ:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-СҰРАҚ: "Сәлем"
-
-❌ ҚАТЕ:
-"Сәлеметсіз бе! Қандай көмек керек? Не істеуге дайынмын?"
-
-✅ ДҰРЫС:
-"Сәлем! Сізге қалай көмектесе аламын? 😊"
-
-НЕЛІКТЕН ДҰРЫС?
-✓ "Сәлем" (бе жоқ!)
-✓ "Сізге қалай көмектесе аламын?" (таза қазақша)
-✓ Қысқа, анық, достық
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📖 ҰЗЫН ЖАУАП ҮЛГІСІ (500 СӨЗ):
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-СҰРАҚ: "500 сөз жақсылық туралы оқиға" немесе басқа 1-10000 ға дейін берсе де.
-
-✅ МҮЛТІКСІЗ ЖАУАП:
-
-Әрине! Міне, сіз үшін жақсылық туралы 500 сөзден құралған оқиға:
-
-✨ ЖАҚСЫЛЫҚТЫҢ ЖЕМІСІ
-
-
-Күз айының салқын таңы еді. Қаланың шетіндегі кішкентай үйде қарт Сәния апай тұрды. Апай зейнеткерлікке шыққаннан кейін жалғыз өмір сүрді. Денсаулығы нашарлады, көңілі де күңіреніп кетті.
-
-• ОҚИҒА
-
-Бір күні үйге жас жігіт Арман келді. Ол ауылдан жұмысқа келген және осы үйді жалға алды. Сәния апай Арманды жылы күлімсіреумен қарсы алды.
-
-Арман апайға көмектесе бастады. Су әкелді, базардан азық-түлік алып келді, үйді тазалады. Апай жігіттің жақсылығына риза болып, оны өз баласындай көрді.
-
-Бір аптадан кейін Арман ауырып қалды. Жұмысынан да айырылды. Апай жігіттің қиын жағдайын көріп, қаржылық көмек көрсетті. Тамақ жасап берді, дәрі-дәрмекпен қамтамасыз етті.
-
-Көп өтпей Арман сауығып кетті. Үлкен компанияда жұмысқа орналасты. Табысты карьера жасады. 
-
-Арман апайды ұмытқан жоқ. Ай сайын қаржылық көмек көрсетті. Демалыс күндері келіп көрді. Біраз уақыттан кейін апайдың денсаулығы түзеліп кетті.
-
-Апайдың көршілері "Неге тез сауықтыңыз?" деп сұрады. Апай жауап берді: "Жақсылық жасасаң, жақсылық қайтады."
-
-• ҚОРЫТЫНДЫ
-
-Жақсылықтың жемісі тәтті. Егер мейірім танытсаң, ол қайтып келеді. Жақсылық - ең бағалы инвестиция.
-
-╔══════════════════════════════════════════════════════╗
-║            VІ. ҚАТАҢ ТЕКСЕРУ ТІЗІМІ                 ║
-╚══════════════════════════════════════════════════════╝
-
-🚨 ЖАУАП БЕРМЕС БҰРЫН МІНДЕТТІ ТЕКСЕР:
-
-□ 1. Барлық әріптер ҚАЗАҚ КИРИЛЛИЦАСЫНДА МА?
-□ 2. Латын/араб/грек әріптері ЖОҚ ПА?
-□ 3. Етістіктер дұрыс па? (-атын/-іпті ЖОҚ ПА?)
-□ 4. Сәлемдесуде "бе" ЖОҚ ПА?
-□ 5. Орысша құрылым ЖОҚ ПА?
-□ 6. Кейіпкерлер таныстырылған БА?
-□ 7. Байланыс сөздері БАР МА?
-□ 8. Логикалық дәйектілік БАР МА?
-□ 9. Сөйлем әртүрлілігі БАР МА?
-□ 10. Формат дұрыс ПА? (стикерлер, бөлімдер)
-
-╔══════════════════════════════════════════════════════╗
-║              VІІ. АБСОЛЮТТІ ТЫЙЫМДАР                ║
-╚══════════════════════════════════════════════════════╝
-
-🚫 ЕШ ҚАШАН МЫНАНЫ ІСТЕМЕ:
-
-❌ Латын әріптерін қолданба
-❌ "Сәлеметсіз бе" деп жазба
-❌ "-атын/-етін" қолданба
-❌ "-пті/-іпті" қолданба
-❌ Орысша құрылым жасама
-❌ Кейіпкерді таныстырмай қолданба
-❌ Байланыссыз сөйлемдер жазба
-❌ "Тексердім" деп жазба
-
-✅ МІНДЕТТІ ІСТЕ:
-
-✓ Тек қазақ кириллицасын қолдан
-✓ Әрбір етістікті үш рет тексер
-✓ Таза қазақша жаз
-✓ Формат сақта
-✓ Логика тексер
-✓ Кейіпкерлерді таныстыр
-
-╔══════════════════════════════════════════════════════╗
-║                СЕНІҢ МАҚСАТЫҢ                        ║
-╚══════════════════════════════════════════════════════╝
-
-🎯 ӘРБІР ЖАУАПТА 10/10 САПА!
-🎯 ЕШ ҚАТЕ ЖОҚ!
-🎯 МҮЛТІКСІЗ ГРАММАТИКА!
-🎯 ТОЛЫҚ ЛОГИКА!
-🎯 КЕРЕМЕТ СТИЛЬ!
-
-═══════════════════════════════════════════════════════
-
-⚠️ СОҢ ҒЫ ЕСКЕРТУ:
-
-Жауап бермес бұрын ҮШ РЕТ ТЕКСЕР!
-Тексеру процесін көрсетпе - тек дайын жауап бер!
-Қате табылса - ҚАЙТА ЖАЗ!
-
-ТЕКСЕРГЕННЕН КЕЙІН ҒАНА ЖАУАП БЕР!` 
-        }
-    ];
-
-    let isProcessing = false;
-
-    async function sendMessage() {
-        if (isProcessing) return;
-        
-        const input = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const text = input.value.trim();
-        
-        if (!text) return;
-
-        isProcessing = true;
-        sendBtn.disabled = true;
-        addMessage(text, 'user');
-        input.value = '';
-        
-        showTypingIndicator();
-        document.getElementById('status').style.display = 'block';
-
-        messagesHistory.push({ "role": "user", "content": text });
-
-        try {
-            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${API_KEY}`,
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": window.location.href,
-                    "X-Title": "Beybaris AI"
-                },
-                body: JSON.stringify({
-                    "model": "google/gemma-3-27b-it:free",
-                    "messages": messagesHistory,
-                    "temperature": 0.3,
-                    "top_p": 0.75,
-                    "max_tokens": 1000,
-                    "frequency_penalty": 0.8,
-                    "presence_penalty": 0.7
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Хабарламаны өңдеу</h2>
+                <button class="close-btn" onclick="closeMessageModal()">×</button>
+            </div>
+            <form id="messageEditForm">
+                <div class="form-group">
+                    <label>Хабарлама мәтіні</label>
+                    <textarea id="editMessageText" required></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeMessageModal()">Артқа</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1;">Сақтау</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getDatabase, ref, onValue, push, update, remove } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA7koBAvT-NoQLKUP2ZeJdSSUX8p-TfWEE",
+            authDomain: "zukkorlar.firebaseapp.com",
+            projectId: "zukkorlar",
+            storageBucket: "zukkorlar.firebasestorage.app",
+            messagingSenderId: "998356070705",
+            appId: "1:998356070705:web:8dfabee0d742c8b9210010",
+            measurementId: "G-BNYGBQK5C1",
+            databaseURL: "https://zukkorlar-default-rtdb.firebaseio.com"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const usersRef = ref(db, 'users');
+        const messagesRef = ref(db, 'chat');
+
+        let allUsers = [];
+        let allMessages = [];
+        let currentEditUserId = null;
+        let currentEditMessageId = null;
+
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            if (tabName === 'users') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('usersTab').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('chatTab').classList.add('active');
             }
+        };
 
-            const data = await response.json();
-            
-            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                throw new Error("Invalid API response");
+        onValue(usersRef, (snapshot) => {
+            allUsers = [];
+            const data = snapshot.val();
+            document.getElementById('loadingState').style.display = 'none';
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    allUsers.push({ id: key, ...data[key] });
+                });
+                renderUsers(allUsers);
+            } else {
+                document.getElementById('usersGrid').innerHTML = '';
+                document.getElementById('emptyState').style.display = 'block';
             }
-
-            const aiText = data.choices[0].message.content;
-
-            hideTypingIndicator();
-            addMessage(aiText, 'bot');
-            
-            messagesHistory.push({ "role": "assistant", "content": aiText });
-            
-            if (messagesHistory.length > 21) {
-                messagesHistory = [
-                    messagesHistory[0],
-                    ...messagesHistory.slice(-20)
-                ];
-            }
-
-        } catch (error) {
-            console.error("Qate:", error);
-            hideTypingIndicator();
-            addMessage(`⚠️ Қате орын алды: ${error.message}. Интернет байланысын немесе модель қолжетімділігін тексеріңіз.`, 'bot');
-        } finally {
-            document.getElementById('status').style.display = 'none';
-            isProcessing = false;
-            sendBtn.disabled = false;
-            input.focus();
-        }
-    }
-
-    function addMessage(text, type) {
-        const box = document.getElementById('chatBox');
-        const wrapper = document.createElement('div');
-        wrapper.className = `message-wrapper ${type}`;
-        
-        const div = document.createElement('div');
-        div.className = `message ${type}-message`;
-        
-        // --- ӨЗГЕРІС ОСЫ ЖЕРДЕ ---
-        // 1. Алдымен мәтіннің басы мен соңындағы бос орындарды алып тастаймыз
-        let formattedText = text.trim(); 
-        
-        // 2. Markdown форматын HTML-ге түрлендіру
-        // **текст** → <strong>текст</strong>
-        formattedText = formattedText.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
-        
-        // *текст* → <em>текст</em>
-        formattedText = formattedText.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
-        
-        div.innerHTML = formattedText;
-        wrapper.appendChild(div);
-        
-        box.appendChild(wrapper);
-        
-        setTimeout(() => {
-            box.scrollTop = box.scrollHeight;
-        }, 50);
-    }
-
-    function showTypingIndicator() {
-        const box = document.getElementById('chatBox');
-        const wrapper = document.createElement('div');
-        wrapper.className = 'message-wrapper bot';
-        wrapper.id = 'typingWrapper';
-        
-        const indicator = document.createElement('div');
-        indicator.className = 'typing-indicator';
-        indicator.innerHTML = '<span></span><span></span><span></span>';
-        wrapper.appendChild(indicator);
-        
-        box.appendChild(wrapper);
-        setTimeout(() => {
-            box.scrollTop = box.scrollHeight;
-        }, 50);
-    }
-
-    function hideTypingIndicator() {
-        const wrapper = document.getElementById('typingWrapper');
-        if (wrapper) {
-            wrapper.remove();
-        }
-    }
-
-    document.getElementById('userInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !isProcessing) {
-            sendMessage();
-        }
-    });
-
-    window.addEventListener('load', () => {
-        document.getElementById('userInput').focus();
-    });
-
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', () => {
-            const chatBox = document.getElementById('chatBox');
-            setTimeout(() => {
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, 100);
         });
-    }
-</script>
 
+        onValue(messagesRef, (snapshot) => {
+            allMessages = [];
+            const data = snapshot.val();
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    allMessages.push({ id: key, ...data[key] });
+                });
+                allMessages.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            }
+            renderMessages();
+        });
+
+        function renderUsers(users) {
+            const grid = document.getElementById('usersGrid');
+            const empty = document.getElementById('emptyState');
+            if (users.length === 0) {
+                grid.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+            grid.innerHTML = users.map(u => {
+                const init = (u.name?.charAt(0) || '') + (u.surname?.charAt(0) || '');
+                return `<div class="user-card">
+                    <div class="user-header">
+                        <div class="user-avatar">${init}</div>
+                        <div class="user-info">
+                            <h3>${u.name || ''} ${u.surname || ''}</h3>
+                            <span class="user-role">${u.role || 'Рөл жоқ'}</span>
+                        </div>
+                    </div>
+                    <div style="color:var(--text-secondary);font-size:11px;margin-bottom:10px;">📚 Сынып: ${u.class || '-'}</div>
+                    <div class="user-stats">
+                        <div class="stat-item"><div class="stat-label">⚡ Энергия</div><div class="stat-value">${u.energy || 0}</div></div>
+                        <div class="stat-item"><div class="stat-label">🏆 Ұпай</div><div class="stat-value">${u.score || 0}</div></div>
+                        <div class="stat-item"><div class="stat-label">✅ Дұрыс</div><div class="stat-value">${u.correctAnswers || 0}</div></div>
+                        <div class="stat-item"><div class="stat-label">❌ Қате</div><div class="stat-value">${u.wrongAnswers || 0}</div></div>
+                    </div>
+                    <div class="user-actions">
+                        <button class="btn btn-small btn-edit" onclick="window.editUser('${u.id}')">✏️ Өңдеу</button>
+                        <button class="btn btn-small btn-delete" onclick="window.deleteUser('${u.id}','${u.name} ${u.surname}')">🗑️ Өшіру</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('chatMessages');
+            const count = document.getElementById('messageCount');
+            count.textContent = `${allMessages.length} хабар`;
+            
+            if (allMessages.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"></div><h3>Хабарламалар жоқ</h3><p>Пайдаланушылар әлі хабарлама жазбаған</p></div>';
+                return;
+            }
+            container.innerHTML = allMessages.map(m => {
+                // Сіздің форматыңыз: t, u, ts, uid
+                const userName = m.u || m.user || m.name || m.sender || m.username || 'Аноним';
+                const messageText = m.t || m.text || m.message || m.content || m.msg || '(хабарлама жоқ)';
+                const timestamp = m.ts || m.timestamp || m.time || m.date || Date.now();
+                
+                const date = new Date(timestamp).toLocaleString('kk-KZ', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                return `<div class="message-item">
+                    <div class="message-header">
+                        <span class="message-user">👤 ${userName}</span>
+                        <span class="message-time">🕒 ${date}</span>
+                    </div>
+                    <div class="message-text">${messageText}</div>
+                    <div class="message-actions">
+                        <button class="message-btn message-edit-btn" onclick="window.editMessage('${m.id}')">✏️ Өзгерту</button>
+                        <button class="message-btn message-delete-btn" onclick="window.deleteMessage('${m.id}', '${userName}')">🗑️ Өшіру</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allUsers.filter(u => 
+                (u.name?.toLowerCase().includes(term)) ||
+                (u.surname?.toLowerCase().includes(term)) ||
+                (u.class?.toLowerCase().includes(term))
+            );
+            renderUsers(filtered);
+        });
+
+        window.openUserModal = function(editId = null) {
+            currentEditUserId = editId;
+            const modal = document.getElementById('userModal');
+            const form = document.getElementById('userForm');
+            const title = document.getElementById('modalTitle');
+            form.reset();
+            if (editId) {
+                title.textContent = 'Қолданушыны өңдеу';
+                const user = allUsers.find(u => u.id === editId);
+                if (user) {
+                    document.getElementById('name').value = user.name || '';
+                    document.getElementById('surname').value = user.surname || '';
+                    document.getElementById('class').value = user.class || '';
+                    document.getElementById('role').value = user.role || '';
+                    document.getElementById('energy').value = user.energy || 100;
+                    document.getElementById('score').value = user.score || 0;
+                    document.getElementById('correctAnswers').value = user.correctAnswers || 0;
+                    document.getElementById('wrongAnswers').value = user.wrongAnswers || 0;
+                    document.getElementById('password').value = user.password || '';
+                }
+            } else {
+                title.textContent = 'Жаңа қолданушы';
+            }
+            modal.classList.add('active');
+        };
+
+        window.closeUserModal = function() {
+            document.getElementById('userModal').classList.remove('active');
+            currentEditUserId = null;
+        };
+
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userData = {
+                name: document.getElementById('name').value,
+                surname: document.getElementById('surname').value,
+                class: document.getElementById('class').value,
+                role: document.getElementById('role').value,
+                energy: parseInt(document.getElementById('energy').value) || 100,
+                score: parseInt(document.getElementById('score').value) || 0,
+                correctAnswers: parseInt(document.getElementById('correctAnswers').value) || 0,
+                wrongAnswers: parseInt(document.getElementById('wrongAnswers').value) || 0,
+                password: document.getElementById('password').value
+            };
+            try {
+                if (currentEditUserId) {
+                    await update(ref(db, `users/${currentEditUserId}`), userData);
+                    showToast('Қолданушы жаңартылды! ', 'success');
+                } else {
+                    await push(usersRef, userData);
+                    showToast('Қолданушы қосылды! ', 'success');
+                }
+                closeUserModal();
+            } catch (error) {
+                showToast('Қате: ' + error.message, 'error');
+            }
+        });
+
+        window.editUser = function(id) {
+            openUserModal(id);
+        };
+
+        window.deleteUser = async function(id, name) {
+            if (confirm(`"${name}" қолданушысын өшіру?`)) {
+                try {
+                    await remove(ref(db, `users/${id}`));
+                    showToast('Қолданушы өшірілді! 🗑️', 'success');
+                } catch (error) {
+                    showToast('Қате: ' + error.message, 'error');
+                }
+            }
+        };
+
+        window.editMessage = function(id) {
+            const msg = allMessages.find(m => m.id === id);
+            if (!msg) return;
+            currentEditMessageId = id;
+            
+            // Сіздің форматыңыз: t, text, message, content
+            const messageText = msg.t || msg.text || msg.message || msg.content || msg.msg || '';
+            document.getElementById('editMessageText').value = messageText;
+            document.getElementById('messageModal').classList.add('active');
+        };
+
+        window.closeMessageModal = function() {
+            document.getElementById('messageModal').classList.remove('active');
+            currentEditMessageId = null;
+        };
+
+        document.getElementById('messageEditForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentEditMessageId) return;
+            const newText = document.getElementById('editMessageText').value.trim();
+            if (!newText) return;
+            
+            try {
+                const msg = allMessages.find(m => m.id === currentEditMessageId);
+                // Сіздің форматыңыз: 't' өрісі
+                const textField = msg && (msg.t !== undefined) ? 't' : 
+                                 msg && (msg.text !== undefined) ? 'text' : 
+                                 msg && (msg.message !== undefined) ? 'message' : 
+                                 msg && (msg.content !== undefined) ? 'content' : 't';
+                
+                await update(ref(db, `chat/${currentEditMessageId}`), {
+                    [textField]: newText,
+                    edited: true
+                });
+                showToast('Хабарлама өзгертілді!', 'success');
+                closeMessageModal();
+            } catch (error) {
+                showToast('Қате: ' + error.message, 'error');
+            }
+        });
+
+        window.deleteMessage = async function(id, user) {
+            if (confirm(`${user} пайдаланушысының хабарламасын өшіру?`)) {
+                try {
+                    await remove(ref(db, `chat/${id}`));
+                    showToast('Хабарлама өшірілді!', 'success');
+                } catch (error) {
+                    showToast('Қате: ' + error.message, 'error');
+                    console.error('Өшіру қатесі:', error);
+                }
+            }
+        };
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        document.getElementById('userModal').addEventListener('click', (e) => {
+            if (e.target.id === 'userModal') closeUserModal();
+        });
+
+        document.getElementById('messageModal').addEventListener('click', (e) => {
+            if (e.target.id === 'messageModal') closeMessageModal();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeUserModal();
+                closeMessageModal();
+            }
+        });
+    </script>
 </body>
 </html>
